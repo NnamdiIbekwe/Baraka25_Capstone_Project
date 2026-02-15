@@ -1,0 +1,42 @@
+from app.models.user import User
+from app.schemas.user import UserCreate, UserRead, UserRole, UserUpdate
+from sqlalchemy.orm import Session
+from app.core.security import get_password_hash
+
+class UserService:
+    
+    @staticmethod
+    def create_user(db: Session, user_in: UserCreate) -> User:
+        hashed_password = get_password_hash(user_in.password)
+        db_user = User(
+            id=user_in.id,
+            name=user_in.name,
+            email=user_in.email,
+            hashed_password=hashed_password,
+            role=user_in.role
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+
+    @staticmethod
+    def get_user_by_email(db: Session, email: str) -> User | None:
+        return db.query(User).filter(User.email == email).first()
+
+    @staticmethod
+    def update_user(db: Session, user: User, user_in: UserUpdate) -> User:
+        for field, value in user_in.model_dump(exclude_unset=True).items():
+            if field == "password":
+                setattr(user, "hashed_password", get_password_hash(value))
+            else:
+                setattr(user, field, value)
+        
+        db.commit()
+        db.refresh(user)
+        return user
+    
+    @staticmethod
+    def delete_user(db: Session, user: User) -> None:
+        db.delete(user)
+        db.commit()

@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database service
+  db:
+    image: postgres:16-alpine
+    container_name: course_enrollment_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-course_enrollment}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  # FastAPI application service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: course_enrollment_api
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-course_enrollment}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      API_V1_STR: /api/v1
+    ports:
+      - "${PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - app_network
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge
