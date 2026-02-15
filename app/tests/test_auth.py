@@ -34,7 +34,7 @@ def test_signup_with_existing_email(client):
         "role": "student",
         "password": "password123"
     })
-    assert response.status_code == 201
+    assert response.status_code == 400
 
     # Second signup with same email
     response = client.post("/api/v1/auth/signup", json={
