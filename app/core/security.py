@@ -29,8 +29,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     else:
-        expires = datetime.now(timezone.utc) + timedelta
-    payload = {"sub": data.get("email"), "exp": expires}
+        expires = datetime.now(timezone.utc) + expires_delta
+    payload = {"sub": data.get("sub"), "exp": expires}
     token = jwt.encode(
         payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return token

@@ -1,16 +1,19 @@
 from fastapi import APIRouter, status, Depends, HTTPException
 from sqlalchemy.orm import Session
+import uuid
 
 from app.api.depends import get_db, get_current_active_user, RoleChecker
 from app.schemas.enrollment import EnrollmentCreate, EnrollmentRead
 from app.schemas.user import UserRole
+from app.models.course import Course
+from app.models.enrollment import Enrollment
 
 router = APIRouter()
 
 @router.post("/{course_id}")
 def enroll(
-    course_id: int,
-    enrollment_in: EnrollmentCreate,
+    course_id: uuid.UUID,
+    # enrollment_in: EnrollmentCreate,
     db: Session = Depends(get_db),
     current_user = Depends(RoleChecker([UserRole.STUDENT]))
 ):
