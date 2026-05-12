@@ -24,8 +24,10 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
 
     try:
         user = UserService.create_user(db, user_in)
-        logger.info(f"User created with email: {user.email}")
+        logger.debug(f"User created with email: {user.email}")
         return user
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -37,7 +39,12 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = UserService.get_user_by_email(db, email=form_data.username)
-    if not user or not verify_password(form_data.password, user.hashed_password):
+    if not user:
+        logger.debug(f"Login failed for email: {form_data.username} - user not found")
+        raise HTTPException(status_code=401, detail="Incorrect credentials")
+    
+    if not verify_password(form_data.password, user.hashed_password):
+        logger.debug(f"Login failed for email: {form_data.username} - incorrect password")
         raise HTTPException(status_code=401, detail="Incorrect credentials")
     
     access_token = create_access_token(data={"sub":str(user.id)})

@@ -3,13 +3,19 @@ from app.schemas.user import UserCreate, UserRead, UserRole, UserUpdate
 from sqlalchemy.orm import Session
 from app.core.security import get_password_hash
 
+
+
+def _safe_hash(password: str) -> str:
+    if len(password.encode('utf-8')) > 72:
+        raise ValueError("Password is too long. Maximum length is 72 bytes.")
+    return get_password_hash(password)
+
 class UserService:
     
     @staticmethod
     def create_user(db: Session, user_in: UserCreate) -> User:
-        hashed_password = get_password_hash(user_in.password)
+        hashed_password = _safe_hash(user_in.password)
         db_user = User(
-            id=user_in.id,
             name=user_in.name,
             email=user_in.email,
             hashed_password=hashed_password,
@@ -28,7 +34,7 @@ class UserService:
     def update_user(db: Session, user: User, user_in: UserUpdate) -> User:
         for field, value in user_in.model_dump(exclude_unset=True).items():
             if field == "password":
-                setattr(user, "hashed_password", get_password_hash(value))
+                setattr(user, "hashed_password", _safe_hash(value))
             else:
                 setattr(user, field, value)
         

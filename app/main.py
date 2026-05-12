@@ -6,7 +6,9 @@ from app.api.v1 import enrollment as enrollment_router
 from app.core.config import settings
 
 
-logging.basicConfig(level=logging.INFO if settings.ENVIRONMENT == "development" else logging.WARNING)
+logging.basicConfig(
+    level=logging.DEBUG if settings.ENVIRONMENT == "development" else logging.WARNING, 
+    format="%(name)s:%(levelname)s:%(message)s")
 
 app = FastAPI(title="Course Enrollment System API")
 app.include_router(auth_router.router, prefix=settings.API_V1_STR + "/auth", tags=["auth"])

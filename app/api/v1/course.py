@@ -14,7 +14,7 @@ router = APIRouter()
 def create_course(
     course_in: CourseCreate, 
     db: Session = Depends(get_db), 
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(RoleChecker("admin")),
 ):
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized to create courses")
