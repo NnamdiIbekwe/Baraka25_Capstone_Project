@@ -1,7 +1,8 @@
 from fastapi import APIRouter, status, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.depends import get_db, get_current_active_user
+from app.api.depends import get_db, get_current_active_user, RoleChecker
+from app.schemas.user import UserRole
 from app.schemas.course import CourseCreate, CourseRead
 from app.services.course import CourseService
 from app.schemas.enrollment import EnrollmentRead
@@ -14,10 +15,10 @@ router = APIRouter()
 def create_course(
     course_in: CourseCreate, 
     db: Session = Depends(get_db), 
-    current_user: User = Depends(RoleChecker("admin")),
+    current_user: User = Depends(RoleChecker([UserRole.ADMIN])),
 ):
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Not authorized to create courses")
+    # if current_user.role != "admin":
+    #     raise HTTPException(status_code=403, detail="Not authorized to create courses")
 
     existing_course = CourseService.get_course_by_code(db, course_in.code)
     if existing_course:

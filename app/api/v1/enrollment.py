@@ -34,7 +34,7 @@ def enroll(
 
 @router.get("/{course_id}", response_model=list[EnrollmentRead])
 def get_enrollments(
-    course_id: int,
+    course_id: uuid.UUID,
     db: Session = Depends(get_db),
     current_user = Depends(RoleChecker([UserRole.ADMIN]))
 ):
