@@ -3,11 +3,15 @@ import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from enum import Enum
 
 from app.db.base import Base
-from app.schemas.user import UserRole
 
 
+
+class UserRole(str, Enum):
+    STUDENT = "student"
+    ADMIN = "admin"
 
 class User(Base):
     __tablename__ = "users"

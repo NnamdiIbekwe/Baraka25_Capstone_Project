@@ -1,11 +1,9 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
-from enum import Enum
 import uuid
 from datetime import datetime
 
-class UserRole(str, Enum):
-    STUDENT = "student"
-    ADMIN = "admin"
+from app.models.user import UserRole
+
 
 class UserBase(BaseModel):
     name: str
