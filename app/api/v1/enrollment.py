@@ -12,21 +12,26 @@ router = APIRouter()
 
 @router.post("/{course_id}")
 def enroll(
-    course_id: uuid.UUID,
+    # course_id: uuid.UUID,
+    course_title: str,
+    course_code: str,
     # enrollment_in: EnrollmentCreate,
     db: Session = Depends(get_db),
     current_user = Depends(RoleChecker([UserRole.STUDENT]))
 ):
 
-    course = db.query(Course).filter(Course.id == course_id, Course.is_active == True).first()
+    # course = db.query(Course).filter(Course.id == course_id, Course.is_active == True).first()
+    course =db.query(Course).filter(Course.title == course_title, Course.code == course_code, Course.is_active == True).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found or not active")
 
-    count = db.query(Enrollment).filter(Enrollment.course_id == course_id).count()
+    # count = db.query(Enrollment).filter(Enrollment.course_id == course_id).count()
+    count = db.query(Enrollment).join(Course).filter(Course.title == course_title, Course.code == course_code).count()
     if count >= course.capacity:
         raise HTTPException(status_code=400, detail="Course is full")
 
-    new_enrollment = Enrollment(user_id=current_user.id, course_id=course_id)
+    # new_enrollment = Enrollment(user_id=current_user.id, course_id=course_id)
+    new_enrollment = Enrollment(user_id=current_user.id, course_title=course_title, course_code=course_code)
     db.add(new_enrollment)
     db.commit()
     db.refresh(new_enrollment)
