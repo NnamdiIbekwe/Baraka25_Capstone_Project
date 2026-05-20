@@ -8,6 +8,7 @@ from app.schemas.course import CourseCreate, CourseRead
 from app.services.course import CourseService
 from app.schemas.enrollment import EnrollmentRead
 from app.models.user import User
+from app.models.course import Course
 
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,8 @@ def list_courses(
     db: Session = Depends(get_db), 
     current_user: User = Depends(get_current_active_user)
 ):
-    return CourseService.list_courses(db)
+    # return CourseService.list_courses(db)
+    return db.query(Course).filter(Course.is_active == True).all()
 
 @router.get("/{code}", response_model=CourseRead)
 def get_course(

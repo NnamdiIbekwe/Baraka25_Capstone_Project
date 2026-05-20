@@ -3,21 +3,18 @@ import uuid
 
 class EnrollmentBase(BaseModel):
     user_id: uuid.UUID
-    # course_id: uuid.UUID 
-    course_title: str
-    course_code: str
+    course_id: uuid.UUID 
       
 
 class EnrollmentCreate(EnrollmentBase):
     pass    
 
 class EnrollmentRead(EnrollmentBase):
-    # id: uuid.UUID
     id: uuid.UUID
     created_at: str
     updated_at: str
-    
-        # model_config = ConfigDict(from_attributes=True)
+    # user_name: str
+    # course_title: str
 
     model_config = ConfigDict(from_attributes=True)
         
